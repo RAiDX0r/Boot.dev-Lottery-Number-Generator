@@ -1,0 +1,1 @@
+// Calculates metrics based on the extracted data.
