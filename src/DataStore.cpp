@@ -1,9 +1,11 @@
 // Handles file operations with the database.
 #include "DataStore.hpp"
+
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-DataStore::DataStore(const std::string &FilePath)
+DataStore::DataStore(const std::string& FilePath)
 {
   this->FilePath = FilePath;
 }
@@ -28,4 +30,33 @@ bool DataStore::DrawExists(const DrawResult& Result) const
   }
 
   return false;
+}
+
+bool DataStore::SaveDraw(const DrawResult& Result)
+{
+  if (this->DrawExists(Result) == true)
+  {
+    std::cout << "[DEBUG] Skipping Draw Date: [" << Result.Date
+              << "] already exists." << std::endl;
+    return false;
+  }
+
+  std::ofstream File(this->FilePath, std::ios::app);
+
+  if (!File.is_open())
+  {
+    std::cerr << "[ERROR] File to open or generate: " << this->FilePath << std::endl;
+    return false;
+  }
+
+  File << Result.Date << ",";
+
+  for (const int& Number : Result.Numbers)
+  {
+    File << Number << ",";
+  }
+
+  File << Result.BonusNumber << "\n";
+
+  return true;
 }

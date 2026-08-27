@@ -20,7 +20,10 @@ FetchContent_MakeAvailable(HtmlParser)
 include_directories(include)
 
 # Define your main executable targeting system
-add_executable(lottery_generator main.cpp)
+add_executable(lottery_generator
+  main.cpp
+  src/DataStore.cpp
+)
 
 # Link the downloaded parser tool using the official namespace structure
 target_link_libraries(lottery_generator PRIVATE HtmlParser::HtmlParser)
