@@ -9,7 +9,7 @@ struct DrawResult
   std::string Date;
 
   /// A collection holding the primary winning ball integers.
-  std::vector<int> Numbers;
+  std::vector<unsigned int> Numbers;
 
   /// The single, non-negative bonus ball number.
   unsigned int BonusNumber;

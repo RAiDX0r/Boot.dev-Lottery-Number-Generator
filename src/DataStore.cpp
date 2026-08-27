@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 DataStore::DataStore(const std::string& FilePath)
 {
@@ -51,7 +52,7 @@ bool DataStore::SaveDraw(const DrawResult& Result)
 
   File << Result.Date << ",";
 
-  for (const int& Number : Result.Numbers)
+  for (const unsigned int& Number : Result.Numbers)
   {
     File << Number << ",";
   }
@@ -60,3 +61,40 @@ bool DataStore::SaveDraw(const DrawResult& Result)
 
   return true;
 }
+
+std::vector<DrawResult> DataStore::LoadAllDraws() const
+{
+  std::vector<DrawResult> RC;
+  std::ifstream AllResults(this->FilePath);
+
+  if (AllResults.is_open() == false)
+  {
+    std::cout << "[DEBUG] Results file not found! " << this->FilePath << std::endl;
+
+    return RC;
+  }
+
+  std::string Line;
+
+  while (std::getline(AllResults, Line))
+  {
+    DrawResult CurrentDrawResult;
+    std::stringstream Stream(Line);
+    std::string Field;
+
+    std::getline(Stream, Field, ',');
+    CurrentDrawResult.Date = Field;
+
+    while (std::getline(Stream, Field, ','))
+    {
+      CurrentDrawResult.Numbers.push_back(std::stoul(Field));
+    }
+
+    CurrentDrawResult.BonusNumber = CurrentDrawResult.Numbers.back();
+    CurrentDrawResult.Numbers.pop_back();
+    RC.push_back(CurrentDrawResult);
+  }
+
+  return RC;
+}
+
