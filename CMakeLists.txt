@@ -47,6 +47,7 @@ add_executable(lottery_generator
   main.cpp
   src/DataStore.cpp
   src/NetworkClient.cpp
+  src/Scraper.cpp
 )
 
 # Link the downloaded parser tool using the official namespace structure
