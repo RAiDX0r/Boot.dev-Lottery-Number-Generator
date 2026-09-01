@@ -4,16 +4,16 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
-DataStore::DataStore(const std::string& FilePath)
+DataStore::DataStore()
 {
-  this->FilePath = FilePath;
 }
 
-bool DataStore::DrawExists(const DrawResult& Result) const
+bool DataStore::DrawExists(LotteryGame Game, const DrawResult& Result) const
 {
-  std::ifstream File(FilePath);
+  std::ifstream File(GetFilename(Game));
 
   if (!File.is_open())
   {
@@ -33,20 +33,22 @@ bool DataStore::DrawExists(const DrawResult& Result) const
   return false;
 }
 
-bool DataStore::SaveDraw(const DrawResult& Result)
+bool DataStore::SaveDraw(LotteryGame Game, const DrawResult& Result)
 {
-  if (this->DrawExists(Result) == true)
+  std::string TargetFile = GetFilename(Game);
+
+  if (DrawExists(Game, Result) == true)
   {
     std::cout << "[DEBUG] Skipping Draw Date: [" << Result.Date
               << "] already exists." << std::endl;
     return false;
   }
 
-  std::ofstream File(this->FilePath, std::ios::app);
+  std::ofstream File(TargetFile, std::ios::app);
 
   if (!File.is_open())
   {
-    std::cerr << "[ERROR] File to open or generate: " << this->FilePath << std::endl;
+    std::cerr << "[ERROR] File to open or generate: " << TargetFile << std::endl;
     return false;
   }
 
@@ -62,14 +64,15 @@ bool DataStore::SaveDraw(const DrawResult& Result)
   return true;
 }
 
-std::vector<DrawResult> DataStore::LoadAllDraws() const
+std::vector<DrawResult> DataStore::LoadAllDraws(LotteryGame Game) const
 {
   std::vector<DrawResult> RC;
-  std::ifstream AllResults(this->FilePath);
+  std::string TargetFile = GetFilename(Game);
+  std::ifstream AllResults(TargetFile);
 
   if (AllResults.is_open() == false)
   {
-    std::cout << "[DEBUG] Results file not found! " << this->FilePath << std::endl;
+    std::cout << "[DEBUG] Results file not found! " << TargetFile << std::endl;
 
     return RC;
   }
@@ -82,6 +85,7 @@ std::vector<DrawResult> DataStore::LoadAllDraws() const
     std::stringstream Stream(Line);
     std::string Field;
 
+    CurrentDrawResult.GameType = Game;
     std::getline(Stream, Field, ',');
     CurrentDrawResult.Date = Field;
 
@@ -98,3 +102,21 @@ std::vector<DrawResult> DataStore::LoadAllDraws() const
   return RC;
 }
 
+std::string DataStore::GetFilename(LotteryGame Game) const
+{
+  switch (Game)
+  {
+    case LotteryGame::LottoMax:
+    {
+      return "lotto_max_data.csv";
+    }
+    case LotteryGame::Lotto649:
+    {
+      return "lotto_649_data.csv";
+    }
+    default:
+    {
+      throw std::invalid_argument("Error: Unknown lottery game type encountered.");
+    }
+  }
+}

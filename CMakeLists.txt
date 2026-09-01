@@ -32,6 +32,8 @@ else()
   set(CURL_USE_SECTRANSP ON CACHE INTERNAL "") # Mac Secure Provider
 endif()
 
+set(USE_LIBIDN2 OFF CACHE INTERNAL "Disable IDN2 support completely")
+
 FetchContent_Declare(
   curl
   GIT_REPOSITORY "https://github.com/curl/curl.git"
