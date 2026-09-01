@@ -108,11 +108,11 @@ std::string DataStore::GetFilename(LotteryGame Game) const
   {
     case LotteryGame::LottoMax:
     {
-      return "lotto_max_data.csv";
+      return GameToString(Game) + "_data.csv";
     }
     case LotteryGame::Lotto649:
     {
-      return "lotto_649_data.csv";
+      return GameToString(Game) + "_data.csv";
     }
     default:
     {

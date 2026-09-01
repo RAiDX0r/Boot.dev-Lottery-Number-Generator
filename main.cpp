@@ -4,65 +4,61 @@
 
 #include "DataStore.hpp"
 #include "NetworkClient.hpp"
+#include "Scraper.hpp"
 #include "Types.hpp"
 
 int main()
 {
-  std::cout << "--- Modern Stateless DataStore Test Bench ---" << std::endl;
+  std::cout << "--- Canadian Lottery Strategy Tracker Engine ---" << std::endl;
 
-  // 1. Initialize our stateless database management machine
+  // 1. Initialize our stateless processing components
+  NetworkClient Client;
+  Scraper WebScraper;
   DataStore Storage;
 
-  // 2. Manufacture a fake mock draw dataset to verify local file track routing
-  DrawResult MockLottoMaxDraw;
-  MockLottoMaxDraw.GameType = LotteryGame::LottoMax;
-  MockLottoMaxDraw.Date = "2026-08-28";
-  MockLottoMaxDraw.Numbers = {1, 7, 8, 10, 41, 42, 48};
-  MockLottoMaxDraw.BonusNumber = 29;
+  // 2. Fetch live data from the web target
+  std::string TargetUrl = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
+  std::cout << "\n[Network] Downloading drawings from: " << TargetUrl << std::endl;
+  std::string RawHtml = Client.DownloadPage(TargetUrl);
 
-  DrawResult MockLotto649Draw;
-  MockLotto649Draw.GameType = LotteryGame::Lotto649;
-  MockLotto649Draw.Date = "2026-08-29";
-  MockLotto649Draw.Numbers = {4, 15, 23, 38, 42, 44};
-  MockLotto649Draw.BonusNumber = 11;
-
-  // 3. Test execution for Lotto Max tracking paths
-  std::cout << "\n[TEST] Writing Mock Lotto Max record..." << std::endl;
-  bool MaxSaved = Storage.SaveDraw(LotteryGame::LottoMax, MockLottoMaxDraw);
-
-  if (MaxSaved == true)
+  // Explicit safety check matching your preferred style
+  if (RawHtml.empty() == true)
   {
-    std::cout << "-> SUCCESS: Lotto Max record logged to disk." << std::endl;
-  }
-  else
-  {
-    std::cout << "-> NOTICE: Lotto Max file skipped (Duplicate record detected)." << std::endl;
+    std::cerr << "[ERROR] Web connection failed or returned an empty page." << std::endl;
+    return 1;
   }
 
-  // 4. Test execution for Lotto 6/49 tracking paths
-  std::cout << "\n[TEST] Writing Mock Lotto 6/49 record..." << std::endl;
-  bool Lotto649Saved = Storage.SaveDraw(LotteryGame::Lotto649, MockLotto649Draw);
+  std::cout << "[Network] Success. Processing " << RawHtml.size() << " bytes of HTML text..." << std::endl;
 
-  if (Lotto649Saved == true)
+  // 3. Execute the extraction algorithm sequence
+  std::vector<DrawResult> ParsedDraws = WebScraper.ParseHtml(RawHtml);
+  std::cout << "[Scraper] Extracted " << ParsedDraws.size() << " raw drawings from webpage." << std::endl;
+
+  // 4. Ingest and save unique records to their dedicated database tracks
+  unsigned int SavedCount = 0;
+  unsigned int SkippedCount = 0;
+
+  std::cout << "\n[Storage] Synchronizing local database files..." << std::endl;
+  for (const auto& Draw : ParsedDraws)
   {
-    std::cout << "-> SUCCESS: Lotto 6/49 record logged to disk." << std::endl;
+    // Pass the extracted Draw's GameType enum straight to the storage engine
+    bool WasSaved = Storage.SaveDraw(Draw.GameType, Draw);
+
+    if (WasSaved == true)
+    {
+      SavedCount++;
+    }
+    else
+    {
+      SkippedCount++;
+    }
   }
-  else
-  {
-    std::cout << "-> NOTICE: Lotto 6/49 file skipped (Duplicate record detected)." << std::endl;
-  }
 
-  // 5. Test data retrieval from separate file environments back into RAM
-  std::cout << "\n[TEST] Verifying in-memory data reload tracking..." << std::endl;
-  
-  std::vector<DrawResult> LoadedMaxDraws = Storage.LoadAllDraws(LotteryGame::LottoMax);
-  std::cout << "Total Lotto Max entries found in file: " << LoadedMaxDraws.size() << std::endl;
-
-  std::vector<DrawResult> Loaded649Draws = Storage.LoadAllDraws(LotteryGame::Lotto649);
-  std::cout << "Total Lotto 6/49 entries found in file: " << Loaded649Draws.size() << std::endl;
-
-  std::cout << "\n---------------------------------------------" << std::endl;
-  std::cout << "--- Test Bench Run Successfully Completed ---" << std::endl;
+  // 5. Finalize execution reporting metrics
+  std::cout << "\n--- Sync Summary ---" << std::endl;
+  std::cout << "Successfully logged: " << SavedCount << " new entries." << std::endl;
+  std::cout << "Safely skipped:      " << SkippedCount << " duplicate records." << std::endl;
+  std::cout << "--------------------" << std::endl;
 
   return 0;
 }

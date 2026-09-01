@@ -10,6 +10,34 @@ enum class LotteryGame
   Lotto649
 };
 
+// Centralised Trnaslation Helpers For LotteryGame
+inline std::string GameToString(LotteryGame Game)
+{
+  switch (Game)
+  {
+    case LotteryGame::LottoMax:
+      return "lotto-max";
+    case LotteryGame::Lotto649:
+      return "lotto-649";
+    default:
+      throw std::invalid_argument("Unknown game enum.");
+  }
+}
+
+inline LotteryGame StringToGame(const std::string& GameString)
+{
+  if (GameString == "lotto-max")
+  {
+    return LotteryGame::LottoMax;
+  }
+  else if (GameString == "lotto-649")
+  {
+    return LotteryGame::Lotto649;
+  }
+
+  throw std::invalid_argument("Unknown game string token: " + GameString);
+}
+
 struct DrawResult
 {
   /// The type of lottery game.
@@ -24,6 +52,3 @@ struct DrawResult
   /// The single, non-negative bonus ball number.
   unsigned int BonusNumber;
 };
-
-
-
