@@ -38,6 +38,19 @@ inline LotteryGame StringToGame(const std::string& GameString)
   throw std::invalid_argument("Unknown game string token: " + GameString);
 }
 
+inline unsigned int GetBallCountForGame(LotteryGame Game)
+{
+  switch (Game)
+  {
+    case LotteryGame::LottoMax:
+      return 8;
+    case LotteryGame::Lotto649:
+      return 7;
+    default:
+      throw std::invalid_argument("Unknown Game Type.");
+  }
+}
+
 struct DrawResult
 {
   /// The type of lottery game.
