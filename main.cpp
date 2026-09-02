@@ -2,10 +2,10 @@
 #include <string>
 #include <vector>
 
+#include "Types.hpp"
 #include "DataStore.hpp"
 #include "NetworkClient.hpp"
 #include "Scraper.hpp"
-#include "Types.hpp"
 
 int main()
 {
@@ -16,12 +16,14 @@ int main()
   Scraper WebScraper;
   DataStore Storage;
 
-  // 2. Fetch live data from the web target
+  // 2. Configure targeted Canadian URLs (Recent page or Historical Year page)
   std::string TargetUrl = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
+  LotteryGame SelectedGame = LotteryGame::LottoMax;
+
   std::cout << "\n[Network] Downloading drawings from: " << TargetUrl << std::endl;
   std::string RawHtml = Client.DownloadPage(TargetUrl);
 
-  // Explicit safety check matching your preferred style
+  // Explicit safety check
   if (RawHtml.empty() == true)
   {
     std::cerr << "[ERROR] Web connection failed or returned an empty page." << std::endl;
@@ -30,8 +32,8 @@ int main()
 
   std::cout << "[Network] Success. Processing " << RawHtml.size() << " bytes of HTML text..." << std::endl;
 
-  // 3. Execute the extraction algorithm sequence
-  std::vector<DrawResult> ParsedDraws = WebScraper.ParseHtml(RawHtml);
+  // 3. Execute extraction sequence - passing the correct game type context
+  std::vector<DrawResult> ParsedDraws = WebScraper.ParseHtml(RawHtml, SelectedGame);
   std::cout << "[Scraper] Extracted " << ParsedDraws.size() << " raw drawings from webpage." << std::endl;
 
   // 4. Ingest and save unique records to their dedicated database tracks
@@ -41,7 +43,6 @@ int main()
   std::cout << "\n[Storage] Synchronizing local database files..." << std::endl;
   for (const auto& Draw : ParsedDraws)
   {
-    // Pass the extracted Draw's GameType enum straight to the storage engine
     bool WasSaved = Storage.SaveDraw(Draw.GameType, Draw);
 
     if (WasSaved == true)

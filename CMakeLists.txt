@@ -8,31 +8,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -------------------------------------------------------------------
-# DEPENDENCY 1: HTML Parser Library
+# DEPENDENCY 1: libcurl Networking Library (HTTPS Only optimization)
 # -------------------------------------------------------------------
 include(FetchContent)
-FetchContent_Declare(
-  HtmlParser
-  GIT_REPOSITORY "https://github.com/ImArjunJ/HtmlParser.git"
-  GIT_TAG        "master"
-)
-FetchContent_MakeAvailable(HtmlParser)
 
-# -------------------------------------------------------------------
-# DEPENDENCY 2: libcurl Networking Library (HTTPS Only optimization)
-# -------------------------------------------------------------------
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")  # Force a static, fast-loading library
 set(BUILD_LIBCURL_DOCS OFF CACHE INTERNAL "") # Don't waste time downloading user manuals
 set(BUILD_MISC_DOCS OFF CACHE INTERNAL "")    # Disable compilation of miscellaneous documentation files
 set(ENABLE_CURL_MANUAL OFF CACHE INTERNAL "") # Stop CMake from building massive, built-in offline user manual tool inside the library's code blocks
+set(USE_LIBIDN2 OFF CACHE INTERNAL "Disable IDN2 support completely")
 
 if(WIN32)
   set(CURL_USE_SCHANNEL ON CACHE INTERNAL "") # Windows Secure Provider
 else()
   set(CURL_USE_SECTRANSP ON CACHE INTERNAL "") # Mac Secure Provider
 endif()
-
-set(USE_LIBIDN2 OFF CACHE INTERNAL "Disable IDN2 support completely")
 
 FetchContent_Declare(
   curl
@@ -41,9 +31,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(curl)
 
-# FIX: Tell the compiler to automatically look for header files inside your include folder
-include_directories(include)
-
+# -------------------------------------------------------------------
+# TARGET CONFIGURATION: Main Executable & Dependency Mapping
+# -------------------------------------------------------------------
 # Define your main executable targeting system
 add_executable(lottery_generator
   main.cpp
@@ -52,5 +42,19 @@ add_executable(lottery_generator
   src/Scraper.cpp
 )
 
-# Link the downloaded parser tool using the official namespace structure
-target_link_libraries(lottery_generator PRIVATE HtmlParser::HtmlParser libcurl)
+# Modern C++ Target-Based Directory Ingestion
+target_include_directories(lottery_generator PRIVATE 
+  include
+  /opt/homebrew/include
+)
+
+# Modern C++ Target-Based Linker Mapping
+target_link_directories(lottery_generator PRIVATE 
+  /opt/homebrew/lib
+)
+
+# Link the system-installed lexbor tool and fetched libcurl safely
+target_link_libraries(lottery_generator PRIVATE 
+  lexbor 
+  libcurl
+)

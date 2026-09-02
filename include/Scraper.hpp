@@ -1,6 +1,5 @@
 #pragma once
 
-#include <HtmlParser/Parser.hpp>
 #include <string>
 #include <vector>
 
@@ -13,5 +12,5 @@
 class Scraper
 {
  public:
-  std::vector<DrawResult> ParseHtml(const std::string& RawHtml) const;
+  std::vector<DrawResult> ParseHtml(const std::string& RawHtml, LotteryGame Game) const;
 };

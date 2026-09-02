@@ -68,4 +68,3 @@ vcpkg_installed/
 Testing/
 .cache/
 .vscode/settings.json
-lottery_history.csv
