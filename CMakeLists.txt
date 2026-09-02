@@ -40,6 +40,9 @@ add_executable(lottery_generator
   src/DataStore.cpp
   src/NetworkClient.cpp
   src/Scraper.cpp
+  src/LexborDocument.cpp
+  src/LexborCollection.cpp
+  src/LexborSelector.cpp
 )
 
 # Modern C++ Target-Based Directory Ingestion
