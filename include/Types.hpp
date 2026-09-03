@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+inline constexpr std::string_view LOTTO_MAX_TEST_URL = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
+
 /// Used to help distinguish between game types
 enum class LotteryGame
 {

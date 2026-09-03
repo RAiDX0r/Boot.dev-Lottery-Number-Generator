@@ -23,16 +23,6 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
   LexborCollection AllAnchorTags;
   LexborCollection AllBalls;
 
-  // SearchEngine.QuerySelect(HtmlDocument, ".details-btn", AllAnchorTags);
-  // SearchEngine.QuerySelect(HtmlDocument, "li.ball, li", AllBalls);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a.details-btn", AllAnchorTags);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td li", AllBalls);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td li", AllBalls);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
-  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td ul li", AllBalls);
-  // SearchEngine.QuerySelect(HtmlDocument, "a", AllAnchorTags);
-  // SearchEngine.QuerySelect(HtmlDocument, "li", AllBalls);
   SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
   SearchEngine.QuerySelect(HtmlDocument, "table.past-results td ul li", AllBalls);
 
@@ -42,8 +32,13 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
     DrawResult CurrentDraw;
     CurrentDraw.GameType = Game;
 
-    // Get the Href value of the anchor tag which has the date information
-    std::string HrefString = this->GetElementAttribute(AllAnchorTags.GetElementAt(i), "href");
+    lxb_dom_element_t* AnchorElement = AllAnchorTags.GetElementAt(i);
+    if (AnchorElement == nullptr)
+    {
+      continue;
+    }
+
+    std::string HrefString = this->GetElementAttribute(AnchorElement, "href");
 
     if (HrefString.empty() == false)
     {
@@ -81,17 +76,14 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
       }
     }
 
-    // If date is malformed, skip current draw entirely
     if (IsMalformed == true)
     {
       IsMalformed = false;
       continue;
     }
 
-    // Find the start of the balls for the current draw by multiplying i by the number of balls for the game
     unsigned int BallStartIndex = i * BallCountInGame;
 
-    // Iterate through the balls for this draw
     for (unsigned int BallOffset = 0; BallOffset < BallCountInGame; BallOffset++)
     {
       unsigned int CurrentBallIndex = BallStartIndex + BallOffset;
@@ -99,13 +91,11 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
 
       if (BallElement != nullptr)
       {
-        // The <li> will only ever have a ball number and no other nested HTML
-        lxb_dom_node_t* TextNode = lxb_dom_node_first_child(lxb_dom_interface_node(BallElement));
+        lxb_dom_node_t* BaseNode = lxb_dom_interface_node(BallElement);
+        lxb_dom_node_t* TextNode = lxb_dom_node_first_child(BaseNode);
 
-        // Validate the Text node is proper
         if (TextNode != nullptr && lxb_dom_node_type(TextNode) == LXB_DOM_NODE_TYPE_TEXT)
         {
-          // Use Lexbor to get the raw chracter array
           lxb_dom_character_data_t* CharData = lxb_dom_interface_character_data(TextNode);
           std::string BallString(reinterpret_cast<const char*>(CharData->data.data), CharData->data.length);
 
@@ -143,7 +133,7 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
       std::cerr << "[WARNING] Scraper skipped row for date [" << CurrentDraw.Date << "] due to malform draw number." << std::endl;
       IsMalformed = false;
     }
-  }  // Main for loop
+  }
 
   return RC;
 }
