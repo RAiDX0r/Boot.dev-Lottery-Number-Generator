@@ -1,65 +1,70 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
+#include <fstream> // 💡 Unlocks file stream structures
 
-#include "Types.hpp"
 #include "DataStore.hpp"
 #include "NetworkClient.hpp"
 #include "Scraper.hpp"
+#include "Types.hpp"
+
+namespace fs = std::filesystem;
 
 int main()
 {
-  std::cout << "--- Canadian Lottery Strategy Tracker Engine ---" << std::endl;
+  std::cout << "=================================================" << std::endl;
+  std::cout << "--- CANADIAN LOTTERY STREAM DIAGNOSTIC BENCH ---" << std::endl;
+  std::cout << "=================================================" << std::endl;
 
-  // 1. Initialize our stateless processing components
   NetworkClient Client;
   Scraper WebScraper;
   DataStore Storage;
 
-  // 2. Configure targeted Canadian URLs (Recent page or Historical Year page)
   std::string TargetUrl = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
   LotteryGame SelectedGame = LotteryGame::LottoMax;
 
-  std::cout << "\n[Network] Downloading drawings from: " << TargetUrl << std::endl;
+  std::cout << "\n[1/3] Downloading Live HTML Byte Stream..." << std::endl;
   std::string RawHtml = Client.DownloadPage(TargetUrl);
 
-  // Explicit safety check
   if (RawHtml.empty() == true)
   {
-    std::cerr << "[ERROR] Web connection failed or returned an empty page." << std::endl;
+    std::cerr << "-> [FAIL] Download returned an empty buffer." << std::endl;
     return 1;
   }
+  std::cout << "-> [PASS] Received " << RawHtml.size() << " bytes of text data." << std::endl;
 
-  std::cout << "[Network] Success. Processing " << RawHtml.size() << " bytes of HTML text..." << std::endl;
-
-  // 3. Execute extraction sequence - passing the correct game type context
-  std::vector<DrawResult> ParsedDraws = WebScraper.ParseHtml(RawHtml, SelectedGame);
-  std::cout << "[Scraper] Extracted " << ParsedDraws.size() << " raw drawings from webpage." << std::endl;
-
-  // 4. Ingest and save unique records to their dedicated database tracks
-  unsigned int SavedCount = 0;
-  unsigned int SkippedCount = 0;
-
-  std::cout << "\n[Storage] Synchronizing local database files..." << std::endl;
-  for (const auto& Draw : ParsedDraws)
+  // 🧪 💡 THE DUMP LOGIC: Save the raw data stream exactly as Lexbor receives it
+  std::string DumpFilename = "debug_raw_stream.html";
+  std::ofstream DumpFile(DumpFilename);
+  
+  if (DumpFile.is_open() == true)
   {
-    bool WasSaved = Storage.SaveDraw(Draw.GameType, Draw);
+    DumpFile << RawHtml;
+    DumpFile.close();
+    std::cout << "\n-> [SUCCESS] Raw stream saved to disk!" << std::endl;
+    std::cout << "   File Path: " << fs::absolute(DumpFilename) << std::endl;
+  }
+  else
+  {
+    std::cerr << "-> [ERROR] Failed to create the debug dump file." << std::endl;
+  }
 
-    if (WasSaved == true)
+  std::cout << "\n[2/3] Executing Scraper Class Parser Pipeline..." << std::endl;
+  std::vector<DrawResult> Results = WebScraper.ParseHtml(RawHtml, SelectedGame);
+  std::cout << "-> Scraper count: Extracted " << Results.size() << " fully-formed records." << std::endl;
+
+  std::cout << "\n[3/3] Synchronizing Storage Layer onto Hard Drive..." << std::endl;
+  unsigned int SavedCount = 0;
+  for (const auto& Draw : Results)
+  {
+    if (Storage.SaveDraw(Draw.GameType, Draw) == true)
     {
       SavedCount++;
     }
-    else
-    {
-      SkippedCount++;
-    }
   }
+  std::cout << "-> Sync Finished. Logged: " << SavedCount << " rows." << std::endl;
 
-  // 5. Finalize execution reporting metrics
-  std::cout << "\n--- Sync Summary ---" << std::endl;
-  std::cout << "Successfully logged: " << SavedCount << " new entries." << std::endl;
-  std::cout << "Safely skipped:      " << SkippedCount << " duplicate records." << std::endl;
-  std::cout << "--------------------" << std::endl;
-
+  std::cout << "\n=================================================" << std::endl;
   return 0;
 }

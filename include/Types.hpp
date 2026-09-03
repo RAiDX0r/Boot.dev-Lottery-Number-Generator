@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -65,3 +67,24 @@ struct DrawResult
   /// The single, non-negative bonus ball number.
   unsigned int BonusNumber;
 };
+
+/**
+ * @brief Safely checks if a string consists entirely of numeric characters.
+ * @param Value The string variable to validate.
+ * @return true if the string is non-empty and safe to convert using std::stoul.
+ */
+inline bool IsNumericString(const std::string& Value)
+{
+  using std::all_of;
+  using std::isdigit;
+
+  if (Value.empty() == true)
+  {
+    return false;
+  }
+
+  return all_of(Value.begin(), Value.end(), [](unsigned char Character)
+  { 
+    return isdigit(Character); 
+  });
+}

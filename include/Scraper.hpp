@@ -5,6 +5,9 @@
 
 #include "Types.hpp"
 
+struct lxb_dom_element;
+typedef struct lxb_dom_element lxb_dom_element_t;
+
 /**
  * @brief Takes a raw HTML string from the NetworkClient class and extracts data using HTMLParser.
  *

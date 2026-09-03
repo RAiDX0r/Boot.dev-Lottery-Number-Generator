@@ -23,11 +23,22 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
   LexborCollection AllAnchorTags;
   LexborCollection AllBalls;
 
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results tr a.details-btn, .draw a.details-btn", AllAnchorTags);
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results tr li, .draw li", AllBalls);
+  // SearchEngine.QuerySelect(HtmlDocument, ".details-btn", AllAnchorTags);
+  // SearchEngine.QuerySelect(HtmlDocument, "li.ball, li", AllBalls);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a.details-btn", AllAnchorTags);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td li", AllBalls);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td li", AllBalls);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
+  // SearchEngine.QuerySelect(HtmlDocument, "table.past-results td ul li", AllBalls);
+  // SearchEngine.QuerySelect(HtmlDocument, "a", AllAnchorTags);
+  // SearchEngine.QuerySelect(HtmlDocument, "li", AllBalls);
+  SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
+  SearchEngine.QuerySelect(HtmlDocument, "table.past-results td ul li", AllBalls);
 
   for (size_t i = 0; i < AllAnchorTags.GetSize(); i++)
   {
+    bool IsMalformed = false;  // Used to skip an entire draw if a single ball/number or date is erroneous
     DrawResult CurrentDraw;
     CurrentDraw.GameType = Game;
 
@@ -53,6 +64,12 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
           {
             CurrentDraw.Date = Segment.substr(0, 10);
           }
+          else
+          {
+            std::cerr << "[WARNING] Scraper skipped row at index [" << i << "] due to missing or malformed date." << std::endl;
+            IsMalformed = true;
+            break;
+          }
 
           IsDateNext = false;
         }
@@ -62,6 +79,13 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
           IsDateNext = true;
         }
       }
+    }
+
+    // If date is malformed, skip current draw entirely
+    if (IsMalformed == true)
+    {
+      IsMalformed = false;
+      continue;
     }
 
     // Find the start of the balls for the current draw by multiplying i by the number of balls for the game
@@ -84,15 +108,42 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
           // Use Lexbor to get the raw chracter array
           lxb_dom_character_data_t* CharData = lxb_dom_interface_character_data(TextNode);
           std::string BallString(reinterpret_cast<const char*>(CharData->data.data), CharData->data.length);
-          CurrentDraw.Numbers.push_back(std::stoul(BallString));
+
+          if (BallString.empty() == false && IsNumericString(BallString) == true)
+          {
+            CurrentDraw.Numbers.push_back(std::stoul(BallString));
+          }
+          else
+          {
+            IsMalformed = true;
+            break;
+          }
         }
+        else
+        {
+          IsMalformed = true;
+          break;
+        }
+      }
+      else
+      {
+        IsMalformed = true;
+        break;
       }
     }
 
-    CurrentDraw.BonusNumber = CurrentDraw.Numbers.back();
-    CurrentDraw.Numbers.pop_back();
-    RC.push_back(CurrentDraw);
-  }
+    if (IsMalformed == false && CurrentDraw.Numbers.empty() == false)
+    {
+      CurrentDraw.BonusNumber = CurrentDraw.Numbers.back();
+      CurrentDraw.Numbers.pop_back();
+      RC.push_back(CurrentDraw);
+    }
+    else
+    {
+      std::cerr << "[WARNING] Scraper skipped row for date [" << CurrentDraw.Date << "] due to malform draw number." << std::endl;
+      IsMalformed = false;
+    }
+  }  // Main for loop
 
   return RC;
 }
