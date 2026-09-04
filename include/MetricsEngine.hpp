@@ -28,4 +28,10 @@ class MetricsEngine
    * @return std::map<unsigned int, unsigned int> A map where the Key is the ball number and the Value is the number of draws skipped since its last appearance.
    */
   std::map<unsigned int, unsigned int> CalculateBallSkipMetrics(const std::vector<DrawResult>& AllDraws, LotteryGame Game) const;
+
+  /**
+   * @brief Returns the total hits for Calendar (1-31) vs Non-Calendar (32-Max) balls.
+   * @return std::pair<unsigned int, unsigned int> {CalendarHits, NonCalendarHits}
+   */
+  std::pair<unsigned int, unsigned int> CalculateCalendarFrequency(const std::vector<DrawResult>& AllDraws, LotteryGame Game) const;
 };

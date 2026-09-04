@@ -14,6 +14,13 @@ enum class LotteryGame
   Lotto649
 };
 
+enum class CalendarPolicy
+{
+  Exclude,      // Strictly 32-Max
+  Allow,        // Full 1-Max pool
+  RestrictHalf  // Max 3 numbers from 1-31
+};
+
 // Centralised Trnaslation Helpers For LotteryGame
 inline std::string GameToString(LotteryGame Game)
 {
@@ -63,6 +70,19 @@ inline unsigned int GetMaxNumberForGame(LotteryGame Game)
       return 52;
     case LotteryGame::Lotto649:
       return 49;
+    default:
+      throw std::invalid_argument("Unknown Game Type.");
+  }
+}
+
+inline std::string GetGameUrl(LotteryGame Game)
+{
+  switch (Game)
+  {
+    case LotteryGame::LottoMax:
+      return "https://ca.lottonumbers.com/lotto-max/numbers/2026";
+    case LotteryGame::Lotto649:
+      return "https://ca.lottonumbers.com/lotto-649/numbers/2026";
     default:
       throw std::invalid_argument("Unknown Game Type.");
   }
