@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-inline constexpr std::string_view LOTTO_MAX_TEST_URL = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
+inline constexpr const char* LOTTO_MAX_TEST_URL = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
 
 /// Used to help distinguish between game types
 enum class LotteryGame
@@ -55,6 +55,19 @@ inline unsigned int GetBallCountForGame(LotteryGame Game)
   }
 }
 
+inline unsigned int GetMaxNumberForGame(LotteryGame Game)
+{
+  switch (Game)
+  {
+    case LotteryGame::LottoMax:
+      return 52;
+    case LotteryGame::Lotto649:
+      return 49;
+    default:
+      throw std::invalid_argument("Unknown Game Type.");
+  }
+}
+
 struct DrawResult
 {
   /// The type of lottery game.
@@ -86,7 +99,5 @@ inline bool IsNumericString(const std::string& Value)
   }
 
   return all_of(Value.begin(), Value.end(), [](unsigned char Character)
-  { 
-    return isdigit(Character); 
-  });
+                { return isdigit(Character); });
 }
