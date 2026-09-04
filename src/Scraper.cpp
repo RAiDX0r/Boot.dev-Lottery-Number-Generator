@@ -23,8 +23,8 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
   LexborCollection AllAnchorTags;
   LexborCollection AllBalls;
 
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results td a", AllAnchorTags);
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results td ul li", AllBalls);
+  SearchEngine.QuerySelect(HtmlDocument, "table.past-results .details-btn", AllAnchorTags);
+  SearchEngine.QuerySelect(HtmlDocument, "table.past-results .ball", AllBalls);
 
   for (size_t i = 0; i < AllAnchorTags.GetSize(); i++)
   {
