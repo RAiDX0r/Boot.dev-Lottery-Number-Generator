@@ -70,7 +70,7 @@ bool LexborSelector::QuerySelect(const LexborDocument& Document, const std::stri
     return false;
   }
   
-  // 💡 FIXED: Natively initialize the cache tables according to your verified header spec!
+  // Natively initialize the cache tables according to your verified header spec!
   lxb_selectors_init(SelectorContext);
 
   // 5. Run the high-performance search algorithm across the DOM tree

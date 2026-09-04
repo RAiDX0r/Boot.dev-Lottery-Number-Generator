@@ -1,16 +1,18 @@
 // Strictly handles downloading the raw web string from the internet.
 
 #include "NetworkClient.hpp"
-#include <string>
+
 #include <curl/curl.h>
+
 #include <iostream>
+#include <string>
 
 size_t WriteCallback(void* Contents, size_t Size, size_t NumberOfElements, std::string* UserData)
 {
   // 1. Calculate the exact size of the incoming block of text data bytes
   size_t TotalSize = Size * NumberOfElements;
 
-  // 💡 The Secure Modern C++ Fix: Wrap the raw data in a safe text window view
+  // Wrap the raw data in a safe text window view
   std::string_view DataWindow(static_cast<const char*>(Contents), TotalSize);
   // 2. Append the raw text bytes directly onto our target C++ string container
   // Contents is a raw pointer block, so we tell the string to append exactly TotalSize characters from it
