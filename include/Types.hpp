@@ -21,7 +21,13 @@ enum class CalendarPolicy
   RestrictHalf  // Max 3 numbers from 1-31
 };
 
-// Centralised Trnaslation Helpers For LotteryGame
+enum class ReportTypes
+{
+  MostPlayed,
+  LeastPlayed
+};
+
+// Centralised Translation Helpers For LotteryGame
 inline std::string GameToString(LotteryGame Game)
 {
   switch (Game)
@@ -121,3 +127,4 @@ inline bool IsNumericString(const std::string& Value)
   return all_of(Value.begin(), Value.end(), [](unsigned char Character)
                 { return isdigit(Character); });
 }
+

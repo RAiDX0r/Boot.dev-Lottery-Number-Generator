@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -11,6 +12,8 @@
 
 int main()
 {
+  constexpr bool DEBUG_SAVE_HTML = true;
+  
   // 1. Define all active games
   std::vector<LotteryGame> ActiveGames = {LotteryGame::LottoMax};
   // Later: { LotteryGame::LottoMax, LotteryGame::Lotto649 };
@@ -26,8 +29,21 @@ int main()
     Reporter.PrintSectionHeader("Processing: " + GameToString(Game));
 
     // 2. Download & Scrape
-    std::string Html = Client.DownloadPage(GetGameUrl(Game));
-    std::vector<DrawResult> Results = WebScraper.ParseHtml(Html, Game);
+    std::string RawHtml = Client.DownloadPage(GetGameUrl(Game));
+
+    if (DEBUG_SAVE_HTML == true)
+    {
+      std::ofstream DebugFile("debug_raw_stream.html");
+
+      if (DebugFile.is_open() == true)
+      {
+        DebugFile << RawHtml;
+        DebugFile.close();
+        std::cout << "-> [DEBUG] Raw HTML saved to debug_raw_stream.html" << std::endl;
+      }
+    }
+
+    std::vector<DrawResult> Results = WebScraper.ParseHtml(RawHtml, Game);
 
     // 3. Save to Disk
     for (const auto& Draw : Results)
