@@ -7,10 +7,21 @@
 
 void ConsoleReporter::PrintFrequencyRanking(const std::map<unsigned int, unsigned int>& FrequencyMap, unsigned int TopN) const
 {
+  std::cout << "\n[ Top 5 " << GetReportString(ReportVerbiage::FrequentTitle) << " Numbers ]" << std::endl;
+  std::cout << "+------+-----------------+" << std::endl;
+  std::cout << "| " << std::left << std::setw(4) << "Ball"
+            << " | " << std::right << std::setw(15) << "Appearances" << " |" << std::endl;
+  std::cout << "+------+-----------------+" << std::endl;
+  this->PrintReportData(FrequencyMap, TopN);
 }
 
 void ConsoleReporter::PrintSkipRanking(const std::map<unsigned int, unsigned int>& SkipMap, unsigned int TopN) const
 {
+}
+
+void ConsoleReporter::PrintRanking(const std::map<unsigned int, unsigned int>& Map, unsigned int TopN, ReportVerbiage ReportType) const
+{
+  
 }
 
 void ConsoleReporter::PrintSectionHeader(const std::string& Title) const

@@ -3,6 +3,8 @@
 #include <map>
 #include <string>
 
+#include "Types.hpp"
+
 /**
  * @brief A stateless utility class responsible for formatting and printing
  *        lottery metrics to the command-line terminal.
@@ -39,6 +41,16 @@ class ConsoleReporter
    * @param TopN The number of top-ranked entries to display (e.g., 5).
    */
   void PrintSkipRanking(const std::map<unsigned int, unsigned int>& SkipMap, unsigned int TopN) const;
+
+  /**
+   * @brief Prints a formatted table of the top N ball numbers based on the report type.
+   *
+   * @param Map A map where the Key is the ball number and the Value is the
+   *            occurances based on the ReportType.
+   * @param TopN The number of top-ranked entries to display (e.g. 5).
+   * @param ReportType The type of report to print.
+   */
+  void PrintRanking(const std::map<unsigned int, unsigned int>& Map, unsigned int TopN, ReportVerbiage ReportType) const;
 
   /**
    * @brief Prints a centered, bordered section header to separate dashboard

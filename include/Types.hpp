@@ -21,10 +21,14 @@ enum class CalendarPolicy
   RestrictHalf  // Max 3 numbers from 1-31
 };
 
-enum class ReportTypes
+enum class ReportVerbiage
 {
-  MostPlayed,
-  LeastPlayed
+  Frequent,
+  Infrequent,
+  FrequentTitle,
+  InfrequentTitle,
+  FrequentColumnHeader,
+  InfreqentColumnHeader
 };
 
 // Centralised Translation Helpers For LotteryGame
@@ -128,3 +132,19 @@ inline bool IsNumericString(const std::string& Value)
                 { return isdigit(Character); });
 }
 
+inline constexpr std::string_view GetReportString(ReportVerbiage Type)
+{
+  switch (Type)
+  {
+    case ReportVerbiage::FrequentTitle:
+      return "Hottest";
+    case ReportVerbiage::InfrequentTitle:
+      return "Coldest";
+    case ReportVerbiage::FrequentColumnHeader:
+      return "Appearances";
+    case ReportVerbiage::InfreqentColumnHeader:
+      return "Games Skipped";
+    default:
+      return "";
+  }
+}
