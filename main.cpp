@@ -12,7 +12,7 @@
 
 int main()
 {
-  constexpr bool DEBUG_SAVE_HTML = true;
+  constexpr bool DEBUG_SAVE_HTML = false;
 
   std::vector<LotteryGame> ActiveGames = {LotteryGame::LottoMax};
 
