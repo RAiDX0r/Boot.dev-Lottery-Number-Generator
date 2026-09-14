@@ -24,12 +24,24 @@ else()
   set(CURL_USE_SECTRANSP ON CACHE INTERNAL "") # Mac Secure Provider
 endif()
 
+# FetchContent_Declare(
+#   curl
+#   GIT_REPOSITORY "https://github.com/curl/curl.git"
+#   GIT_TAG        "curl-8_22_0"
+# )
 FetchContent_Declare(
   curl
-  GIT_REPOSITORY "https://github.com/curl/curl.git"
-  GIT_TAG        "curl-8_11_1"
+  URL https://curl.se/download/curl-8.22.0.tar.xz
+  URL_HASH f7ef3ae8a22e521f289803fe93543eb64c329b58aa73a9e224dfd915a2a5f4f7
 )
 FetchContent_MakeAvailable(curl)
+
+FetchContent_Declare(
+  nlohmann_json
+  URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+  URL_HASH SHA256=42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa
+)
+FetchContent_MakeAvailable(nlohmann_json)
 
 # -------------------------------------------------------------------
 # TARGET CONFIGURATION: Main Executable & Dependency Mapping
