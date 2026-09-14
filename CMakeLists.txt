@@ -45,6 +45,7 @@ add_executable(lottery_generator
   src/LexborSelector.cpp
   src/MetricsEngine.cpp
   src/ConsoleReporter.cpp
+#  src/NumberGenerator.cpp
 )
 
 # Modern C++ Target-Based Directory Ingestion

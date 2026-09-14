@@ -54,7 +54,7 @@ bool DataStore::SaveDraw(LotteryGame Game, const DrawResult& Result)
 
   File << Result.Date << ",";
 
-  for (const unsigned int& Number : Result.Numbers)
+  for (const unsigned int Number : Result.Numbers)
   {
     File << Number << ",";
   }

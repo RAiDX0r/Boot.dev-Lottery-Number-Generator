@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -13,10 +13,8 @@
 int main()
 {
   constexpr bool DEBUG_SAVE_HTML = true;
-  
-  // 1. Define all active games
+
   std::vector<LotteryGame> ActiveGames = {LotteryGame::LottoMax};
-  // Later: { LotteryGame::LottoMax, LotteryGame::Lotto649 };
 
   NetworkClient Client;
   Scraper WebScraper;
@@ -28,13 +26,11 @@ int main()
   {
     Reporter.PrintSectionHeader("Processing: " + GameToString(Game));
 
-    // 2. Download & Scrape
     std::string RawHtml = Client.DownloadPage(GetGameUrl(Game));
 
     if (DEBUG_SAVE_HTML == true)
     {
       std::ofstream DebugFile("debug_raw_stream.html");
-
       if (DebugFile.is_open() == true)
       {
         DebugFile << RawHtml;
@@ -45,20 +41,32 @@ int main()
 
     std::vector<DrawResult> Results = WebScraper.ParseHtml(RawHtml, Game);
 
-    // 3. Save to Disk
+    unsigned int SavedCount = 0;
     for (const auto& Draw : Results)
     {
-      Storage.SaveDraw(Game, Draw);
+      if (Storage.SaveDraw(Game, Draw) == true)
+      {
+        SavedCount++;
+      }
+    }
+    std::cout << "-> Synced " << SavedCount << " new records to disk." << std::endl;
+
+    std::vector<DrawResult> History = Storage.LoadAllDraws(Game);
+    if (History.empty() == true)
+    {
+      std::cerr << "-> [SKIP] No historical data available for metrics." << std::endl;
+      continue;
     }
 
-    // 4. Load & Calculate Metrics
-    std::vector<DrawResult> History = Storage.LoadAllDraws(Game);
     auto FreqMap = Engine.CalculateNumberFrequency(History, Game);
     auto SkipMap = Engine.CalculateBallSkipMetrics(History, Game);
+    auto CalendarStats = Engine.CalculateCalendarFrequency(History, Game);
 
-    // 5. Report Dashboard
-    Reporter.PrintFrequencyRanking(FreqMap, 5);
-    Reporter.PrintSkipRanking(SkipMap, 5);
+    std::cout << "\n-> Calendar Split: " << CalendarStats.first << " (1-31) / "
+              << CalendarStats.second << " (32-Max)" << std::endl;
+
+    Reporter.PrintRanking(FreqMap, 5, ReportVerbiage::Frequent);
+    Reporter.PrintRanking(SkipMap, 5, ReportVerbiage::Infrequent);
   }
 
   return 0;

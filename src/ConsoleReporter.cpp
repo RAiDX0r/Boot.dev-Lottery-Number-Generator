@@ -5,23 +5,29 @@
 #include <iostream>
 #include <vector>
 
-void ConsoleReporter::PrintFrequencyRanking(const std::map<unsigned int, unsigned int>& FrequencyMap, unsigned int TopN) const
-{
-  std::cout << "\n[ Top 5 " << GetReportString(ReportVerbiage::FrequentTitle) << " Numbers ]" << std::endl;
-  std::cout << "+------+-----------------+" << std::endl;
-  std::cout << "| " << std::left << std::setw(4) << "Ball"
-            << " | " << std::right << std::setw(15) << "Appearances" << " |" << std::endl;
-  std::cout << "+------+-----------------+" << std::endl;
-  this->PrintReportData(FrequencyMap, TopN);
-}
-
-void ConsoleReporter::PrintSkipRanking(const std::map<unsigned int, unsigned int>& SkipMap, unsigned int TopN) const
-{
-}
-
 void ConsoleReporter::PrintRanking(const std::map<unsigned int, unsigned int>& Map, unsigned int TopN, ReportVerbiage ReportType) const
 {
-  
+  ReportVerbiage Title;
+  ReportVerbiage ColumnHeader;
+
+  switch (ReportType)
+  {
+    case ReportVerbiage::Frequent:
+      Title = ReportVerbiage::FrequentTitle;
+      ColumnHeader = ReportVerbiage::FrequentColumnHeader;
+      break;
+
+    case ReportVerbiage::Infrequent:
+      Title = ReportVerbiage::InfrequentTitle;
+      ColumnHeader = ReportVerbiage::InfrequentColumnHeader;
+      break;
+
+    default:
+      break;
+  }
+
+  this->PrintReportHeader(TopN, Title, ColumnHeader);
+  this->PrintReportData(Map, TopN);
 }
 
 void ConsoleReporter::PrintSectionHeader(const std::string& Title) const
@@ -31,18 +37,20 @@ void ConsoleReporter::PrintSectionHeader(const std::string& Title) const
   std::cout << "=================================================" << std::endl;
 }
 
-void ConsoleReporter::PrintReportHeader(const std::string& FrequencyType, const std::string& ColumnHeader, const unsigned int TopN) const
+void ConsoleReporter::PrintReportHeader(const unsigned int TopN, const ReportVerbiage Title, const ReportVerbiage ColumnHeader) const
 {
-  std::cout << "\n[ Top " << TopN << " " << FrequencyType << " Numbers ]" << std::endl;
+  std::cout << "\n[ Top " << TopN << " " << GetReportString(Title) << " Numbers ]" << std::endl;
   std::cout << "+------+-----------------+" << std::endl;
   std::cout << "| " << std::left << std::setw(4) << "Ball"
-            << " | " << std::right << std::setw(15) << ColumnHeader << " |" << std::endl;
+            << " | " << std::right << std::setw(15) << GetReportString(ColumnHeader) << " |" << std::endl;
   std::cout << "+------+-----------------+" << std::endl;
 }
 
 void ConsoleReporter::PrintReportData(const std::map<unsigned int, unsigned int>& DataMap, unsigned int TopN) const
 {
-  std::vector<std::pair<const unsigned int, unsigned int>> SortedBalls(DataMap.begin(), DataMap.end());
+  std::vector<std::pair<unsigned int, unsigned int>> SortedBalls(DataMap.begin(), DataMap.end());
+  std::sort(SortedBalls.begin(), SortedBalls.end(), [](const auto& First, const auto& Second)
+            { return First.second > Second.second; });
 
   for (unsigned int i = 0; i < TopN && i < SortedBalls.size(); ++i)
   {
@@ -51,3 +59,4 @@ void ConsoleReporter::PrintReportData(const std::map<unsigned int, unsigned int>
   }
   std::cout << "+------+-----------------+" << std::endl;
 }
+

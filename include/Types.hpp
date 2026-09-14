@@ -28,7 +28,7 @@ enum class ReportVerbiage
   FrequentTitle,
   InfrequentTitle,
   FrequentColumnHeader,
-  InfreqentColumnHeader
+  InfrequentColumnHeader
 };
 
 // Centralised Translation Helpers For LotteryGame
@@ -142,7 +142,7 @@ inline constexpr std::string_view GetReportString(ReportVerbiage Type)
       return "Coldest";
     case ReportVerbiage::FrequentColumnHeader:
       return "Appearances";
-    case ReportVerbiage::InfreqentColumnHeader:
+    case ReportVerbiage::InfrequentColumnHeader:
       return "Games Skipped";
     default:
       return "";
