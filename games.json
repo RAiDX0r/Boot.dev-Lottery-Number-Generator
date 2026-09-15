@@ -1,0 +1,20 @@
+{
+  "games": [
+    {
+      "id": "lotto-max",
+      "display_name": "Lotto Max",
+      "base_url": "https://ca.lottonumbers.com/lotto-max/numbers/",
+      "ball_count": 8,
+      "max_number": 50,
+      "start_year": 2009
+    },
+    {
+      "id": "lotto-649",
+      "display_name": "Lotto 6/49",
+      "base_url": "https://ca.lottonumbers.com/lotto-649/numbers/",
+      "ball_count": 7,
+      "max_number": 49,
+      "start_year": 1982
+    }
+  ]
+}

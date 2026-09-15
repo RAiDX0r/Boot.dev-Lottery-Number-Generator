@@ -2,107 +2,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <fstream>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
-inline constexpr const char* LOTTO_MAX_TEST_URL = "https://ca.lottonumbers.com/lotto-max/numbers/2026";
-
-/// Used to help distinguish between game types
-enum class LotteryGame
-{
-  LottoMax,
-  Lotto649
-};
-
-enum class CalendarPolicy
-{
-  Exclude,      // Strictly 32-Max
-  Allow,        // Full 1-Max pool
-  RestrictHalf  // Max 3 numbers from 1-31
-};
-
-enum class ReportVerbiage
-{
-  Frequent,
-  Infrequent,
-  FrequentTitle,
-  InfrequentTitle,
-  FrequentColumnHeader,
-  InfrequentColumnHeader
-};
-
-// Centralised Translation Helpers For LotteryGame
-inline std::string GameToString(LotteryGame Game)
-{
-  switch (Game)
-  {
-    case LotteryGame::LottoMax:
-      return "lotto-max";
-    case LotteryGame::Lotto649:
-      return "lotto-649";
-    default:
-      throw std::invalid_argument("Unknown game enum.");
-  }
-}
-
-inline LotteryGame StringToGame(const std::string& GameString)
-{
-  if (GameString == "lotto-max")
-  {
-    return LotteryGame::LottoMax;
-  }
-  else if (GameString == "lotto-649")
-  {
-    return LotteryGame::Lotto649;
-  }
-
-  throw std::invalid_argument("Unknown game string token: " + GameString);
-}
-
-inline unsigned int GetBallCountForGame(LotteryGame Game)
-{
-  switch (Game)
-  {
-    case LotteryGame::LottoMax:
-      return 8;
-    case LotteryGame::Lotto649:
-      return 7;
-    default:
-      throw std::invalid_argument("Unknown Game Type.");
-  }
-}
-
-inline unsigned int GetMaxNumberForGame(LotteryGame Game)
-{
-  switch (Game)
-  {
-    case LotteryGame::LottoMax:
-      return 52;
-    case LotteryGame::Lotto649:
-      return 49;
-    default:
-      throw std::invalid_argument("Unknown Game Type.");
-  }
-}
-
-inline std::string GetGameUrl(LotteryGame Game)
-{
-  switch (Game)
-  {
-    case LotteryGame::LottoMax:
-      return "https://ca.lottonumbers.com/lotto-max/numbers/2026";
-    case LotteryGame::Lotto649:
-      return "https://ca.lottonumbers.com/lotto-649/numbers/2026";
-    default:
-      throw std::invalid_argument("Unknown Game Type.");
-  }
-}
-
 struct DrawResult
 {
-  /// The type of lottery game.
-  LotteryGame GameType;
-
   /// The chronological date of the drawing in strict YYYY-MM-DD format.
   std::string Date;
 
@@ -111,6 +17,21 @@ struct DrawResult
 
   /// The single, non-negative bonus ball number.
   unsigned int BonusNumber;
+};
+
+struct GameDefinition
+{
+  std::string Id;
+  std::string DisplayName;
+  std::string BaseUrl;
+  unsigned int BallCount;
+  unsigned int MaxNumber;
+  unsigned int StartYear;
+};
+
+struct LotteryConfig
+{
+  std::vector<GameDefinition> Games;
 };
 
 /**
@@ -132,19 +53,30 @@ inline bool IsNumericString(const std::string& Value)
                 { return isdigit(Character); });
 }
 
-inline constexpr std::string_view GetReportString(ReportVerbiage Type)
+inline LotteryConfig LoadGameConfig(const std::string& FilePath)
 {
-  switch (Type)
+  LotteryConfig Config;
+  std::ifstream File(FilePath);
+
+  if (File.is_open() == false)
   {
-    case ReportVerbiage::FrequentTitle:
-      return "Hottest";
-    case ReportVerbiage::InfrequentTitle:
-      return "Coldest";
-    case ReportVerbiage::FrequentColumnHeader:
-      return "Appearances";
-    case ReportVerbiage::InfrequentColumnHeader:
-      return "Games Skipped";
-    default:
-      return "";
+    throw std::runtime_error("Failed to open config file: " + FilePath);
   }
+
+  nlohmann::json JsonData = nlohmann::json::parse(File);
+
+  for (const auto& GameJson : JsonData["games"])
+  {
+    GameDefinition GameDef;
+    GameDef.Id = GameJson["id"];
+    GameDef.DisplayName = GameJson["display_name"];
+    GameDef.BaseUrl = GameJson["base_url"];
+    GameDef.BallCount = GameJson["ball_count"];
+    GameDef.MaxNumber = GameJson["max_number"];
+    GameDef.StartYear = GameJson["start_year"];
+
+    Config.Games.push_back(GameDef);
+  }
+
+  return Config;
 }
