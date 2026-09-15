@@ -7,7 +7,7 @@
 
 #include "Types.hpp"
 
-std::map<unsigned int, unsigned int> MetricsEngine::CalculateNumberFrequency(const std::vector<DrawResult>& AllDraws, [[maybe_unused]] LotteryGame Game) const
+std::map<unsigned int, unsigned int> MetricsEngine::CalculateNumberFrequency(const std::vector<DrawResult>& AllDraws, [[maybe_unused]] const GameDefinition& GameDef) const
 {
   std::map<unsigned int, unsigned int> RC;
 
@@ -22,9 +22,9 @@ std::map<unsigned int, unsigned int> MetricsEngine::CalculateNumberFrequency(con
   return RC;
 }
 
-std::map<unsigned int, unsigned int> MetricsEngine::CalculateBallSkipMetrics(const std::vector<DrawResult>& AllDraws, LotteryGame Game) const
+std::map<unsigned int, unsigned int> MetricsEngine::CalculateBallSkipMetrics(const std::vector<DrawResult>& AllDraws, const GameDefinition& GameDef) const
 {
-  const unsigned int MAX_NUMBER = GetMaxNumberForGame(Game);
+  const unsigned int MAX_NUMBER = GameDef.MaxNumber;
   std::map<unsigned int, unsigned int> RC;
   std::set<unsigned int> TempSet;
   std::set<unsigned int> RecordedBalls;
@@ -71,9 +71,9 @@ std::map<unsigned int, unsigned int> MetricsEngine::CalculateBallSkipMetrics(con
   return RC;
 }
 
-std::pair<unsigned int, unsigned int> MetricsEngine::CalculateCalendarFrequency(const std::vector<DrawResult>& AllDraws, LotteryGame Game) const
+std::pair<unsigned int, unsigned int> MetricsEngine::CalculateCalendarFrequency(const std::vector<DrawResult>& AllDraws, [[maybe_unused]] const GameDefinition& GameDef) const
 {
-  const unsigned int MAX_NUMBER = GetMaxNumberForGame(Game);
+  const unsigned int MAX_NUMBER = GameDef.MaxNumber;
   std::pair<unsigned int, unsigned int> RC;
 
   RC.first = 0;
