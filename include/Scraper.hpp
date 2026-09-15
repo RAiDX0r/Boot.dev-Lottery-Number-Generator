@@ -22,7 +22,7 @@ class Scraper
    * @param Game The explicit lottery game context parameter currently being targeted.
    * @return A standard vector collection holding every unique, fully-populated DrawResult struct.
    */
-  std::vector<DrawResult> ParseHtml(const std::string& RawHtml, LotteryGame Game) const;
+  std::vector<DrawResult> ParseHtml(const std::string& RawHtml, const GameDefinition& GameDef) const;
 
  private:
   std::string GetElementAttribute(lxb_dom_element_t* Element, const std::string& AttrName) const;

@@ -68,4 +68,13 @@ vcpkg_installed/
 Testing/
 .cache/
 .vscode/settings.json
+
+# Generated Data Files
+*.csv
+
+# Debug Artifacts
+debug_raw_stream.html
+
+# macOS System Files
 .DS_Store
+

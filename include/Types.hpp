@@ -17,6 +17,9 @@ struct DrawResult
 
   /// The single, non-negative bonus ball number.
   unsigned int BonusNumber;
+
+  // String that represents the type of lottery game.
+  std::string GameType;
 };
 
 struct GameDefinition

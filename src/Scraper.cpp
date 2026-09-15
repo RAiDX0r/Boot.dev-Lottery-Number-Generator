@@ -8,7 +8,7 @@
 #include "LexborDocument.hpp"
 #include "LexborSelector.hpp"
 
-std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGame Game) const
+std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const GameDefinition& GameDef) const
 {
   std::vector<DrawResult> RC;
 
@@ -17,7 +17,7 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
     return RC;
   }
 
-  unsigned int BallCountInGame = GetBallCountForGame(Game);
+  unsigned int BallCountInGame = GameDef.BallCount;
   LexborDocument HtmlDocument(RawHtml);
   LexborSelector SearchEngine;
   LexborCollection AllAnchorTags;
@@ -30,7 +30,7 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, LotteryGa
   {
     bool IsMalformed = false;  // Used to skip an entire draw if a single ball/number or date is erroneous
     DrawResult CurrentDraw;
-    CurrentDraw.GameType = Game;
+    CurrentDraw.GameType = GameDef.Id;
 
     lxb_dom_element_t* AnchorElement = AllAnchorTags.GetElementAt(i);
     if (AnchorElement == nullptr)
