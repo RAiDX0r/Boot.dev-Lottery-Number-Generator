@@ -53,6 +53,8 @@ class DataStore
    */
   std::vector<DrawResult> LoadAllDraws(const GameDefinition& GameDef) const;
 
+  std::string GetLatestDate(const GameDefinition& GameDef) const;
+
  private:
   /**
    * @brief Get the Filename based on the type of lottery game.
@@ -61,4 +63,6 @@ class DataStore
    * @return std::string String representing the filename for the game type.
    */
   std::string GetFilename(const GameDefinition& GameDef) const;
+
+  void EnsureDataDirectory() const;
 };

@@ -48,6 +48,7 @@ void ConsoleReporter::PrintReportHeader(const unsigned int TopN, const ReportVer
 
 void ConsoleReporter::PrintReportData(const std::map<unsigned int, unsigned int>& DataMap, unsigned int TopN) const
 {
+  // Pair .first connot be const as it will cause compiler errors
   std::vector<std::pair<unsigned int, unsigned int>> SortedBalls(DataMap.begin(), DataMap.end());
   std::sort(SortedBalls.begin(), SortedBalls.end(), [](const auto& First, const auto& Second)
             { return First.second > Second.second; });
@@ -59,4 +60,3 @@ void ConsoleReporter::PrintReportData(const std::map<unsigned int, unsigned int>
   }
   std::cout << "+------+-----------------+" << std::endl;
 }
-

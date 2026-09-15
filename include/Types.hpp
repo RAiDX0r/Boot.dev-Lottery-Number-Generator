@@ -38,6 +38,27 @@ struct LotteryConfig
 };
 
 /**
+ * @brief Used to limit 
+ * 
+ */
+enum class CalendarPolicy
+{
+  Exclude,      // Strictly 32-Max
+  Allow,        // Full 1-Max pool
+  RestrictHalf  // Max 3 numbers from 1-31
+};
+
+enum class ReportVerbiage
+{
+  Frequent,
+  Infrequent,
+  FrequentTitle,
+  InfrequentTitle,
+  FrequentColumnHeader,
+  InfrequentColumnHeader
+};
+
+/**
  * @brief Safely checks if a string consists entirely of numeric characters.
  * @param Value The string variable to validate.
  * @return true if the string is non-empty and safe to convert using std::stoul.
@@ -82,4 +103,21 @@ inline LotteryConfig LoadGameConfig(const std::string& FilePath)
   }
 
   return Config;
+}
+
+inline constexpr std::string_view GetReportString(ReportVerbiage Type)
+{
+  switch (Type)
+  {
+    case ReportVerbiage::FrequentTitle:
+      return "Hottest";
+    case ReportVerbiage::InfrequentTitle:
+      return "Coldest";
+    case ReportVerbiage::FrequentColumnHeader:
+      return "Appearances";
+    case ReportVerbiage::InfrequentColumnHeader:
+      return "Games Skipped";
+    default:
+      return "";
+  }
 }

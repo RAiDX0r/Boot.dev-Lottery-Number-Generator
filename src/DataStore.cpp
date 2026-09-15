@@ -1,6 +1,7 @@
 // Handles file operations with the database.
 #include "DataStore.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -109,5 +110,20 @@ std::string DataStore::GetFilename(const GameDefinition& GameDef) const
     throw std::invalid_argument("Game Definition ID cannot be empty.");
   }
 
-  return GameDef.Id + "_data.csv";
+  return "data/" + GameDef.Id + "_data.csv";
+}
+
+void DataStore::EnsureDataDirectory() const
+{
+  std::filesystem::path DataDirectory("data");
+
+  if (std::filesystem::exists(DataDirectory) == false)
+  {
+    std::filesystem::create_directories(DataDirectory);
+  }
+}
+
+std::string DataStore::GetLatestDate(const GameDefinition& GameDef) const
+{
+  
 }
