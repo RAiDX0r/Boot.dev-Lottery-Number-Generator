@@ -28,7 +28,7 @@ class DataStore
    * @return true if the drawing date is already logged, false if it is a new
    * entry.
    */
-  bool DrawExists(LotteryGame Game, const DrawResult& Result) const;
+  bool DrawExists(const GameDefinition& GameDef, const DrawResult& Result) const;
 
   /**
    * @brief Appends a new lottery drawing to our local database file.
@@ -41,7 +41,7 @@ class DataStore
    * @return true if the row was successfully appended, false if it was a
    * duplicate.
    */
-  bool SaveDraw(LotteryGame Game, const DrawResult& Result);
+  bool SaveDraw(const GameDefinition& GameDef, const DrawResult& Result);
 
   /**
    * @brief Reads all historical drawing rows out of the file back into system
@@ -51,7 +51,7 @@ class DataStore
    * @return A standard vector collection holding every logged DrawResult
    * struct.
    */
-  std::vector<DrawResult> LoadAllDraws(LotteryGame Game) const;
+  std::vector<DrawResult> LoadAllDraws(const GameDefinition& GameDef) const;
 
  private:
   /**
@@ -60,5 +60,5 @@ class DataStore
    * @param Game Lottery game type.
    * @return std::string String representing the filename for the game type.
    */
-  std::string GetFilename(LotteryGame Game) const;
+  std::string GetFilename(const GameDefinition& GameDef) const;
 };

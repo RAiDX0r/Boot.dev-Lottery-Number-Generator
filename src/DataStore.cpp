@@ -11,9 +11,9 @@ DataStore::DataStore()
 {
 }
 
-bool DataStore::DrawExists(LotteryGame Game, const DrawResult& Result) const
+bool DataStore::DrawExists(const GameDefinition& GameDef, const DrawResult& Result) const
 {
-  std::ifstream File(GetFilename(Game));
+  std::ifstream File(GetFilename(GameDef));
 
   if (!File.is_open())
   {
@@ -33,11 +33,11 @@ bool DataStore::DrawExists(LotteryGame Game, const DrawResult& Result) const
   return false;
 }
 
-bool DataStore::SaveDraw(LotteryGame Game, const DrawResult& Result)
+bool DataStore::SaveDraw(const GameDefinition& GameDef, const DrawResult& Result)
 {
-  std::string TargetFile = GetFilename(Game);
+  std::string TargetFile = GetFilename(GameDef);
 
-  if (DrawExists(Game, Result) == true)
+  if (DrawExists(GameDef, Result) == true)
   {
     std::cout << "[DEBUG] Skipping Draw Date: [" << Result.Date
               << "] already exists." << std::endl;
@@ -64,10 +64,10 @@ bool DataStore::SaveDraw(LotteryGame Game, const DrawResult& Result)
   return true;
 }
 
-std::vector<DrawResult> DataStore::LoadAllDraws(LotteryGame Game) const
+std::vector<DrawResult> DataStore::LoadAllDraws(const GameDefinition& GameDef) const
 {
   std::vector<DrawResult> RC;
-  std::string TargetFile = GetFilename(Game);
+  std::string TargetFile = GetFilename(GameDef);
   std::ifstream AllResults(TargetFile);
 
   if (AllResults.is_open() == false)
@@ -85,7 +85,7 @@ std::vector<DrawResult> DataStore::LoadAllDraws(LotteryGame Game) const
     std::stringstream Stream(Line);
     std::string Field;
 
-    CurrentDrawResult.GameType = Game;
+    CurrentDrawResult.GameType = GameDef.Id;
     std::getline(Stream, Field, ',');
     CurrentDrawResult.Date = Field;
 
@@ -102,21 +102,12 @@ std::vector<DrawResult> DataStore::LoadAllDraws(LotteryGame Game) const
   return RC;
 }
 
-std::string DataStore::GetFilename(LotteryGame Game) const
+std::string DataStore::GetFilename(const GameDefinition& GameDef) const
 {
-  switch (Game)
+  if (GameDef.Id.empty() == true)
   {
-    case LotteryGame::LottoMax:
-    {
-      return GameToString(Game) + "_data.csv";
-    }
-    case LotteryGame::Lotto649:
-    {
-      return GameToString(Game) + "_data.csv";
-    }
-    default:
-    {
-      throw std::invalid_argument("Error: Unknown lottery game type encountered.");
-    }
+    throw std::invalid_argument("Game Definition ID cannot be empty.");
   }
+
+  return GameDef.Id + "_data.csv";
 }
