@@ -22,11 +22,19 @@ struct DrawResult
   std::string GameType;
 };
 
+struct GameSource
+{
+  std::string BaseUrl;
+  std::string AnchorSelector;
+  std::string BallSelector;
+  std::string DateStrategy;
+};
+
 struct GameDefinition
 {
   std::string Id;
   std::string DisplayName;
-  std::string BaseUrl;
+  std::vector<GameSource> Sources;
   unsigned int BallCount;
   unsigned int MaxNumber;
   unsigned int StartYear;
@@ -38,8 +46,8 @@ struct LotteryConfig
 };
 
 /**
- * @brief Used to limit 
- * 
+ * @brief Used to limit
+ *
  */
 enum class CalendarPolicy
 {
@@ -94,10 +102,19 @@ inline LotteryConfig LoadGameConfig(const std::string& FilePath)
     GameDefinition GameDef;
     GameDef.Id = GameJson["id"];
     GameDef.DisplayName = GameJson["display_name"];
-    GameDef.BaseUrl = GameJson["base_url"];
     GameDef.BallCount = GameJson["ball_count"];
     GameDef.MaxNumber = GameJson["max_number"];
     GameDef.StartYear = GameJson["start_year"];
+
+    for (const auto& SourceData : GameJson["sources"])
+    {
+      GameSource NewGameSource;
+      NewGameSource.BaseUrl = SourceData["base_url"];
+      NewGameSource.AnchorSelector = SourceData["anchor_selector"];
+      NewGameSource.BallSelector = SourceData["ball_selector"];
+      NewGameSource.DateStrategy = SourceData["date_strategy"];
+      GameDef.Sources.push_back(NewGameSource);
+    }
 
     Config.Games.push_back(GameDef);
   }

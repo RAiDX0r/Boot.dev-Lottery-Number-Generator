@@ -3,7 +3,20 @@
     {
       "id": "lotto-max",
       "display_name": "Lotto Max",
-      "base_url": "https://ca.lottonumbers.com/lotto-max/numbers/",
+      "sources": [
+        {
+          "base_url": "https://ca.lottonumbers.com/lotto-max/numbers/",
+          "anchor_selector": "table.past-results .details-btn",
+          "ball_selector": "table.past-results .ball",
+          "date_strategy": "url_segment"
+        },
+        {
+          "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-max/draw-history/",
+          "anchor_selector": "div.s_3_12",
+          "ball_selector": "div.extraspace span.ball",
+          "date_strategy": "text_parse"
+        }
+      ],
       "ball_count": 8,
       "max_number": 50,
       "start_year": 2009
@@ -11,7 +24,20 @@
     {
       "id": "lotto-649",
       "display_name": "Lotto 6/49",
-      "base_url": "https://ca.lottonumbers.com/lotto-649/numbers/",
+      "sources": [
+        {
+          "base_url": "https://ca.lottonumbers.com/lotto-649/numbers/",
+          "anchor_selector": "table.past-results .details-btn",
+          "ball_selector": "table.past-results .ball",
+          "date_strategy": "url_segment"
+        },
+        {
+          "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-649/draw-history/",
+          "anchor_selector": "div.s_3_12",
+          "ball_selector": "div.extraspace span.ball",
+          "date_strategy": "text_parse"
+        }
+      ],
       "ball_count": 7,
       "max_number": 49,
       "start_year": 1982

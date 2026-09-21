@@ -1,7 +1,8 @@
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #include "ConsoleReporter.hpp"
 #include "DataStore.hpp"
@@ -10,28 +11,37 @@
 #include "Scraper.hpp"
 #include "Types.hpp"
 
+// ============================================================
+// Debug Flags: Adjust these to test different sources
+// ============================================================
 
-/*
+// Index into the games array in games.json
+// 0 = lotto-max, 1 = lotto-649
+constexpr int TEST_GAME_INDEX = 0;
 
-Secondary Website
-https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-max/draw-history/2009
+// Index into the sources array for the selected game
+// 0 = ca.lottonumbers.com (primary)
+// 1 = lottodatabase.com (secondary)
+constexpr int TEST_SOURCE_INDEX = 1;
 
-*/
+// Year to download and test
+constexpr unsigned int TEST_YEAR = 2026;
 
+// Set to true to save the raw HTML to a debug file
+constexpr bool SAVE_RAW_HTML = true;
 
+// Set to true to print the first 5 extracted draws
+constexpr bool PRINT_RESULTS = true;
 
-
+// ============================================================
 
 int main()
 {
-  constexpr bool DEBUG_SAVE_HTML = false;
-  constexpr unsigned int END_YEAR = 2026;
-
   std::cout << "=================================================" << std::endl;
-  std::cout << "--- Canadian Lottery Strategy Tracker ---" << std::endl;
+  std::cout << "--- Source Verification Test Bench ---" << std::endl;
   std::cout << "=================================================" << std::endl;
 
-  // 1. Load Data-Driven Configuration
+  // 1. Load configuration
   LotteryConfig Config;
   try
   {
@@ -49,87 +59,113 @@ int main()
     return 1;
   }
 
-  std::cout << "-> Loaded " << Config.Games.size() << " game(s) from configuration." << std::endl;
+  // 2. Validate debug flag indices
+  if (TEST_GAME_INDEX < 0 || TEST_GAME_INDEX >= static_cast<int>(Config.Games.size()))
+  {
+    std::cerr << "[FATAL] TEST_GAME_INDEX out of range." << std::endl;
+    return 1;
+  }
+
+  const GameDefinition& GameDef = Config.Games[TEST_GAME_INDEX];
+
+  if (TEST_SOURCE_INDEX < 0 || TEST_SOURCE_INDEX >= static_cast<int>(GameDef.Sources.size()))
+  {
+    std::cerr << "[FATAL] TEST_SOURCE_INDEX out of range." << std::endl;
+    return 1;
+  }
+
+  const GameSource& Source = GameDef.Sources[TEST_SOURCE_INDEX];
+
+  std::cout << "\n-> Game:   " << GameDef.DisplayName << " (" << GameDef.Id << ")" << std::endl;
+  std::cout << "-> Source:  " << Source.BaseUrl << std::endl;
+  std::cout << "-> Anchor:  " << Source.AnchorSelector << std::endl;
+  std::cout << "-> Balls:   " << Source.BallSelector << std::endl;
+  std::cout << "-> Date:    " << Source.DateStrategy << std::endl;
+  std::cout << "-> Year:    " << TEST_YEAR << std::endl;
+  std::cout << "-> BallCount: " << GameDef.BallCount << std::endl;
+
+  // 3. Build URL and download
+  std::string TargetUrl = Source.BaseUrl + std::to_string(TEST_YEAR);
+  std::cout << "\n[1/3] Downloading: " << TargetUrl << std::endl;
 
   NetworkClient Client;
-  Scraper WebScraper;
-  DataStore Storage;
-  MetricsEngine Engine;
-  ConsoleReporter Reporter;
+  std::string RawHtml = Client.DownloadPage(TargetUrl);
 
-  // 2. Iterate through each configured game
-  for (const auto& GameDef : Config.Games)
+  if (RawHtml.empty() == true)
   {
-    Reporter.PrintSectionHeader("Processing: " + GameDef.DisplayName);
+    std::cerr << "-> [FAIL] Download returned empty response." << std::endl;
+    return 1;
+  }
 
-    // 3. Download & Scrape all available years
-    unsigned int TotalSaved = 0;
+  std::cout << "-> [PASS] Received " << RawHtml.size() << " bytes." << std::endl;
 
-    for (unsigned int Year = GameDef.StartYear; Year <= END_YEAR; ++Year)
+  // 4. Save raw HTML for browser comparison
+  if (SAVE_RAW_HTML == true)
+  {
+    std::string DebugPath = "debug_" + GameDef.Id + "_" + Source.DateStrategy + "_" + std::to_string(TEST_YEAR) + ".html";
+    std::ofstream DebugFile(DebugPath);
+
+    if (DebugFile.is_open() == true)
     {
-      std::string TargetUrl = GameDef.BaseUrl + std::to_string(Year);
-      std::cout << "-> Fetching: " << TargetUrl << std::endl;
+      DebugFile << RawHtml;
+      DebugFile.close();
+      std::cout << "-> [DEBUG] Raw HTML saved to: " << DebugPath << std::endl;
+    }
+    else
+    {
+      std::cerr << "-> [WARN] Could not open debug file for writing." << std::endl;
+    }
+  }
 
-      std::string RawHtml = Client.DownloadPage(TargetUrl);
+  // 5. Parse with Scraper
+  std::cout << "\n[2/3] Parsing HTML with Lexbor..." << std::endl;
 
-      if (RawHtml.empty() == true)
+  Scraper WebScraper;
+  std::vector<DrawResult> Results = WebScraper.ParseHtml(RawHtml, GameDef, Source);
+
+  std::cout << "-> Extracted " << Results.size() << " draw records." << std::endl;
+
+  if (Results.empty() == true)
+  {
+    std::cerr << "-> [WARN] No results extracted. Check selectors and date strategy." << std::endl;
+    std::cerr << "-> [HINT] Open the debug HTML file in a browser and verify the selectors." << std::endl;
+    return 1;
+  }
+
+  // 6. Print first N results for verification
+  if (PRINT_RESULTS == true)
+  {
+    std::cout << "\n[3/3] First " << (Results.size() < 5 ? Results.size() : 5) << " extracted draws:" << std::endl;
+    std::cout << "+------------+------------------------------------------+----------+" << std::endl;
+    std::cout << "|    Date    |              Numbers                     |  Bonus   |" << std::endl;
+    std::cout << "+------------+------------------------------------------+----------+" << std::endl;
+
+    unsigned int PrintCount = (Results.size() < 5) ? Results.size() : 5;
+
+    for (unsigned int i = 0; i < PrintCount; ++i)
+    {
+      const DrawResult& Draw = Results[i];
+      std::string NumberString;
+
+      for (const unsigned int Num : Draw.Numbers)
       {
-        std::cerr << "   -> [SKIP] Empty response for year " << Year << std::endl;
-        continue;
-      }
-
-      if (DEBUG_SAVE_HTML == true)
-      {
-        std::string DebugPath = "debug_" + GameDef.Id + "_" + std::to_string(Year) + ".html";
-        std::ofstream DebugFile(DebugPath);
-
-        if (DebugFile.is_open() == true)
+        if (!NumberString.empty())
         {
-          DebugFile << RawHtml;
-          DebugFile.close();
+          NumberString += " ";
         }
+        NumberString += std::to_string(Num);
       }
 
-      std::vector<DrawResult> Results = WebScraper.ParseHtml(RawHtml, GameDef);
-
-      for (const auto& Draw : Results)
-      {
-        if (Storage.SaveDraw(GameDef, Draw) == true)
-        {
-          TotalSaved++;
-        }
-      }
-
-      std::cout << "   -> Extracted " << Results.size() << " records." << std::endl;
+      std::cout << "| " << std::left << std::setw(10) << Draw.Date
+                << "| " << std::left << std::setw(36) << NumberString
+                << "| " << std::right << std::setw(8) << Draw.BonusNumber << " |" << std::endl;
     }
 
-    std::cout << "-> Total new records synced: " << TotalSaved << std::endl;
-
-    // 4. Load Full History & Calculate Metrics
-    std::vector<DrawResult> History = Storage.LoadAllDraws(GameDef);
-
-    if (History.empty() == true)
-    {
-      std::cerr << "-> [SKIP] No historical data available for " << GameDef.DisplayName << std::endl;
-      continue;
-    }
-
-    std::cout << "-> Total historical records in memory: " << History.size() << std::endl;
-
-    auto FreqMap = Engine.CalculateNumberFrequency(History, GameDef);
-    auto SkipMap = Engine.CalculateBallSkipMetrics(History, GameDef);
-    auto CalendarStats = Engine.CalculateCalendarFrequency(History, GameDef);
-
-    std::cout << "\n-> Calendar Split: " << CalendarStats.first << " (1-31) / "
-              << CalendarStats.second << " (32-Max)" << std::endl;
-
-    // 5. Report Dashboard
-    Reporter.PrintRanking(FreqMap, 5, ReportVerbiage::Frequent);
-    Reporter.PrintRanking(SkipMap, 5, ReportVerbiage::Infrequent);
+    std::cout << "+------------+------------------------------------------+----------+" << std::endl;
   }
 
   std::cout << "\n=================================================" << std::endl;
-  std::cout << "--- All Games Processed Successfully ---" << std::endl;
+  std::cout << "--- Test Complete ---" << std::endl;
   std::cout << "=================================================" << std::endl;
 
   return 0;
