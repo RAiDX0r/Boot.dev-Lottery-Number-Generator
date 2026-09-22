@@ -6,13 +6,13 @@
       "sources": [
         {
           "base_url": "https://ca.lottonumbers.com/lotto-max/numbers/",
-          "anchor_selector": "table.past-results .details-btn",
+          "date_selector": "table.past-results .details-btn",
           "ball_selector": "table.past-results .ball",
           "date_strategy": "url_segment"
         },
         {
           "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-max/draw-history/",
-          "anchor_selector": "div.s_3_12",
+          "date_selector": "div.s_3_12",
           "ball_selector": "div.extraspace span.ball",
           "date_strategy": "text_parse"
         }
@@ -27,13 +27,13 @@
       "sources": [
         {
           "base_url": "https://ca.lottonumbers.com/lotto-649/numbers/",
-          "anchor_selector": "table.past-results .details-btn",
+          "date_selector": "table.past-results .details-btn",
           "ball_selector": "table.past-results .ball",
           "date_strategy": "url_segment"
         },
         {
           "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-649/draw-history/",
-          "anchor_selector": "div.s_3_12",
+          "date_selector": "div.s_3_12",
           "ball_selector": "div.extraspace span.ball",
           "date_strategy": "text_parse"
         }

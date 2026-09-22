@@ -78,7 +78,7 @@ int main()
 
   std::cout << "\n-> Game:   " << GameDef.DisplayName << " (" << GameDef.Id << ")" << std::endl;
   std::cout << "-> Source:  " << Source.BaseUrl << std::endl;
-  std::cout << "-> Anchor:  " << Source.AnchorSelector << std::endl;
+  std::cout << "-> Anchor:  " << Source.DateSelector << std::endl;
   std::cout << "-> Balls:   " << Source.BallSelector << std::endl;
   std::cout << "-> Date:    " << Source.DateStrategy << std::endl;
   std::cout << "-> Year:    " << TEST_YEAR << std::endl;

@@ -8,7 +8,7 @@
 #include "LexborDocument.hpp"
 #include "LexborSelector.hpp"
 
-std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const GameDefinition& GameDef) const
+std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const GameDefinition& GameDef, const GameSource& Source) const
 {
   std::vector<DrawResult> RC;
 
@@ -20,25 +20,40 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const Gam
   unsigned int BallCountInGame = GameDef.BallCount;
   LexborDocument HtmlDocument(RawHtml);
   LexborSelector SearchEngine;
-  LexborCollection AllAnchorTags;
+  LexborCollection AllDates;
   LexborCollection AllBalls;
 
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results .details-btn", AllAnchorTags);
-  SearchEngine.QuerySelect(HtmlDocument, "table.past-results .ball", AllBalls);
+  SearchEngine.QuerySelect(HtmlDocument, Source.DateSelector, AllDates);
+  SearchEngine.QuerySelect(HtmlDocument, Source.BallSelector, AllBalls);
 
-  for (size_t i = 0; i < AllAnchorTags.GetSize(); i++)
+  for (size_t i = 0; i < AllDates.GetSize(); i++)
   {
-    bool IsMalformed = false;  // Used to skip an entire draw if a single ball/number or date is erroneous
+    bool IsMalformed = false;  // Used to skip an entire 
     DrawResult CurrentDraw;
     CurrentDraw.GameType = GameDef.Id;
 
-    lxb_dom_element_t* AnchorElement = AllAnchorTags.GetElementAt(i);
-    if (AnchorElement == nullptr)
+    lxb_dom_element_t* DateElement = AllDates.GetElementAt(i);
+    if (DateElement == nullptr)
     {
       continue;
     }
 
-    std::string HrefString = this->GetElementAttribute(AnchorElement, "href");
+    // Parse Date
+    std::string HrefString;
+
+    if (Source.DateStrategy == "url_segment")
+    {
+      HrefString = this->GetElementAttribute(DateElement, "href");
+    }
+    else if (Source.DateStrategy == "text_parse")
+    {
+
+    }
+    else
+    {
+      HrefString = "";
+      IsMalformed = true;
+    }
 
     if (HrefString.empty() == false)
     {
@@ -74,6 +89,10 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const Gam
           IsDateNext = true;
         }
       }
+    }
+    else
+    {
+      IsMalformed = true;
     }
 
     if (IsMalformed == true)
@@ -163,3 +182,24 @@ std::string Scraper::GetElementAttribute(lxb_dom_element_t* Element, const std::
 
   return "";
 }
+
+  std::optional<std::string> Scraper::ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& Format) const
+  {
+    std::string RC;
+    /*
+    Convert DateElement into a generic Lexbor Node type and get 
+    inner text and text length.
+    */
+    lxb_dom_node_t* Node = lxb_dom_interface_node(DateElement);
+    size_t TextLength = 0;
+    lxb_char_t* Text = lxb_dom_node_text_content(Node, &TextLength);
+
+    if (Text == nullptr)
+    {
+      return std::nullopt;  // No text or none found
+    }
+
+    std::string DateText(reinterpret_cast<const char*>(Text), TextLength);
+
+    return RC;
+  }

@@ -25,7 +25,7 @@ struct DrawResult
 struct GameSource
 {
   std::string BaseUrl;
-  std::string AnchorSelector;
+  std::string DateSelector;
   std::string BallSelector;
   std::string DateStrategy;
 };
@@ -110,7 +110,7 @@ inline LotteryConfig LoadGameConfig(const std::string& FilePath)
     {
       GameSource NewGameSource;
       NewGameSource.BaseUrl = SourceData["base_url"];
-      NewGameSource.AnchorSelector = SourceData["anchor_selector"];
+      NewGameSource.DateSelector = SourceData["anchor_selector"];
       NewGameSource.BallSelector = SourceData["ball_selector"];
       NewGameSource.DateStrategy = SourceData["date_strategy"];
       GameDef.Sources.push_back(NewGameSource);
