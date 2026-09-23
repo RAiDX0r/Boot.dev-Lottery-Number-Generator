@@ -70,10 +70,15 @@ Testing/
 .vscode/settings.json
 
 # Generated Data Files
+data/
 *.csv
 
 # Debug Artifacts
-debug_raw_stream.html
+debug_*.html
+
+# Selector-verification HTML snapshots
+HTMLTestCode.html
+HTMLTestCodeHistoricalPage.html
 
 # macOS System Files
 .DS_Store
