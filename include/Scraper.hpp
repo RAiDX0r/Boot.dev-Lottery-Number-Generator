@@ -20,7 +20,7 @@ class Scraper
    * @brief Parses lottery drawing pages (both recent results and archives) into structured DrawResult records.
    *
    * @param RawHtml The raw web markup text string data downloaded by the network client.
-   * @param Game The explicit lottery game context parameter currently being targeted.
+   * @param GameDef The explicit lottery game context parameter currently being targeted.
    * @param GameSource Contains information on how to parse a particular game.
    * @return A standard vector collection holding every unique, fully-populated DrawResult struct.
    */
@@ -36,5 +36,21 @@ class Scraper
    */
   std::string GetElementAttribute(lxb_dom_element_t* Element, const std::string& AttrName) const;
 
-  std::optional<std::string> ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& Format) const;
+  /**
+   * @brief Extracts and normalizes a draw date from a DOM element into YYYY-MM-DD format.
+   *
+   * The extraction method is determined by the Strategy parameter:
+   * - "url_segment": reads the element's href attribute, splits on '/',
+   *   locates the segment following "numbers", and takes the first 10 characters.
+   * - "text_parse": extracts the element's inner text, then slices it using
+   *   the placeholder tokens anchored by the DateParseString template string.
+   *
+   * @param DateElement The Lexbor DOM element that carries the date information.
+   * @param Strategy The date extraction method ("url_segment" or "text_parse").
+   * @param DateParseString The date_parse_string template from games.json (e.g. "{DotW}, {Month} {Day}, {Year}").
+   *               Ignored when Strategy is "url_segment".
+   * @return std::optional<std::string> The normalized date in YYYY-MM-DD format,
+   *         or std::nullopt if the date could not be extracted or is malformed.
+   */
+  std::optional<std::string> ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& DateParseString) const;
 };

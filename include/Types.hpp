@@ -28,6 +28,7 @@ struct GameSource
   std::string DateSelector;
   std::string BallSelector;
   std::string DateStrategy;
+  std::string DateParseString;
 };
 
 struct GameDefinition
@@ -87,7 +88,7 @@ inline bool IsNumericString(const std::string& Value)
 
 inline LotteryConfig LoadGameConfig(const std::string& FilePath)
 {
-  LotteryConfig Config;
+  LotteryConfig RC;
   std::ifstream File(FilePath);
 
   if (File.is_open() == false)
@@ -113,13 +114,14 @@ inline LotteryConfig LoadGameConfig(const std::string& FilePath)
       NewGameSource.DateSelector = SourceData["anchor_selector"];
       NewGameSource.BallSelector = SourceData["ball_selector"];
       NewGameSource.DateStrategy = SourceData["date_strategy"];
+      NewGameSource.DateParseString = GameJson["date_parse_string"];
       GameDef.Sources.push_back(NewGameSource);
     }
 
-    Config.Games.push_back(GameDef);
+    RC.Games.push_back(GameDef);
   }
 
-  return Config;
+  return RC;
 }
 
 inline constexpr std::string_view GetReportString(ReportVerbiage Type)

@@ -14,7 +14,8 @@
           "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-max/draw-history/",
           "date_selector": "div.s_3_12",
           "ball_selector": "div.extraspace span.ball",
-          "date_strategy": "text_parse"
+          "date_strategy": "text_parse",
+          "date_parse_string": "{DotW}, {Month} {Day}, {Year}"
         }
       ],
       "ball_count": 8,
@@ -35,7 +36,8 @@
           "base_url": "https://www.lottodatabase.com/lotto-database/canadian-lotteries/lotto-649/draw-history/",
           "date_selector": "div.s_3_12",
           "ball_selector": "div.extraspace span.ball",
-          "date_strategy": "text_parse"
+          "date_strategy": "text_parse",
+          "date_parse_string": "{DotW}, {Month} {Day}, {Year}"
         }
       ],
       "ball_count": 7,

@@ -2,8 +2,12 @@
 
 #include "Scraper.hpp"
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <sstream>
+#include <string_view>
+#include <vector>
 
 #include "LexborDocument.hpp"
 #include "LexborSelector.hpp"
@@ -28,7 +32,7 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const Gam
 
   for (size_t i = 0; i < AllDates.GetSize(); i++)
   {
-    bool IsMalformed = false;  // Used to skip an entire 
+    bool IsMalformed = false;  // Used to skip an entire
     DrawResult CurrentDraw;
     CurrentDraw.GameType = GameDef.Id;
 
@@ -47,7 +51,6 @@ std::vector<DrawResult> Scraper::ParseHtml(const std::string& RawHtml, const Gam
     }
     else if (Source.DateStrategy == "text_parse")
     {
-
     }
     else
     {
@@ -183,23 +186,48 @@ std::string Scraper::GetElementAttribute(lxb_dom_element_t* Element, const std::
   return "";
 }
 
-  std::optional<std::string> Scraper::ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& Format) const
+std::optional<std::string> Scraper::ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& DateParseString) const
+{
+  /*
+  Convert DateElement into a generic Lexbor Node type and get
+  inner text and text length.
+  */
+  lxb_dom_node_t* Node = lxb_dom_interface_node(DateElement);
+  size_t TextLength = 0;
+  lxb_char_t* Text = lxb_dom_node_text_content(Node, &TextLength);
+
+  if (Text == nullptr)
   {
-    std::string RC;
-    /*
-    Convert DateElement into a generic Lexbor Node type and get 
-    inner text and text length.
-    */
-    lxb_dom_node_t* Node = lxb_dom_interface_node(DateElement);
-    size_t TextLength = 0;
-    lxb_char_t* Text = lxb_dom_node_text_content(Node, &TextLength);
-
-    if (Text == nullptr)
-    {
-      return std::nullopt;  // No text or none found
-    }
-
-    std::string DateText(reinterpret_cast<const char*>(Text), TextLength);
-
-    return RC;
+    return std::nullopt;  // No text or none found
   }
+
+  constexpr std::string_view DOTW = "{DotW}";
+  constexpr std::string_view DAY = "{Day}";
+  constexpr std::string_view MONTH = "{Month}";
+  constexpr std::string_view YEAR = "{Year}";
+
+  std::string RC;
+  std::string_view DateText(reinterpret_cast<const char*>(Text), TextLength);
+  std::vector<std::string_view> DateTextSplit;
+  size_t DotwLocation = DateText.find(DOTW);
+  size_t DayLocation = DateText.find(DAY);
+  size_t MonthLocation = DateText.find(MONTH);
+  size_t YearLocation = DateText.find(YEAR);
+  std::array DatePartsOrder = {
+      std::pair{DotwLocation, DOTW},
+      std::pair{DayLocation, DAY},
+      std::pair{MonthLocation, MONTH},
+      std::pair{YearLocation, YEAR}};
+
+  std::sort(DatePartsOrder.begin(), DatePartsOrder.end());
+
+  for (int i = 0; i < 4; i++)
+  {
+    size_t CurrentPosition = 0;
+    if (DatePartsOrder[i].first == 0)
+    {
+    }
+  }
+
+  return RC;
+}
