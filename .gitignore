@@ -75,6 +75,7 @@ data/
 
 # Debug Artifacts
 debug_*.html
+spec.md
 
 # Selector-verification HTML snapshots
 HTMLTestCode.html
