@@ -52,5 +52,43 @@ class Scraper
    * @return std::optional<std::string> The normalized date in YYYY-MM-DD format,
    *         or std::nullopt if the date could not be extracted or is malformed.
    */
-  std::optional<std::string> ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, const std::string& DateParseString) const;
+  std::optional<std::string> ParseDate(lxb_dom_element_t* DateElement, const std::string& Strategy, std::string_view DateParseString) const;
+
+  /**
+   * @brief Tokenises a date template string into its constituent literal and identifier segments.
+   *
+   * Given a template like "{DotW}, {Month} {Day}, {Year}", this method locates
+   * each identifier, then slices the string into the alternating segments that
+   * make it up. The returned vector preserves left-to-right order:
+   *
+   *   ["{DotW}", ", ", "{Month}", " ", "{Day}", ", ", "{Year}"]
+   *
+   * Odd-indexed elements are identifiers; even-indexed elements are the literal
+   * text between them. (This holds when the template begins with an identifier.)
+   *
+   * Any identifier not found in the template is skipped.
+   *
+   * @param DateParseString The template pattern (from games.json "date_parse_string").
+   * @param Identifiers     The four placeholder tokens to search for.
+   * @return Ordered vector of segments comprising the template.
+   */
+  std::vector<std::string_view> TokenisePattern(std::string_view DateParseString, const std::array<std::string_view, 4> Identifiers) const;
+
+  /**
+   * @brief Takes the month part and returns the two digit month as a string.
+   *
+   * @param Month The string view to process representing the extracted month.
+   * @return std::string Two digit month.
+   */
+  std::string ProcessMonthToMM(const std::string_view Month) const;
+
+  /**
+   * @brief Safe, zero-allocation case-insensitive equality check.
+   *
+   * @param a First character.
+   * @param b Second character.
+   * @return true a is the same case-insensitive letter as b.
+   * @return false a is not the same case-insensitive letter as b.
+   */
+  bool Equals(std::string_view a, std::string_view b) const;
 };
